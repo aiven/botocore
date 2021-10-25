@@ -21,6 +21,7 @@ from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 
 import botocore.utils
 from botocore.compat import (
+    HAS_SOCKS,
     HTTPHeaders,
     HTTPResponse,
     MutableMapping,
@@ -241,6 +242,27 @@ class AWSHTTPConnectionPool(HTTPConnectionPool):
 
 class AWSHTTPSConnectionPool(HTTPSConnectionPool):
     ConnectionCls = AWSHTTPSConnection
+
+
+if HAS_SOCKS:
+    from urllib3.contrib.socks import (
+        SOCKSConnection,
+        SOCKSHTTPConnectionPool,
+        SOCKSHTTPSConnection,
+        SOCKSHTTPSConnectionPool,
+    )
+
+    class AWSSOCKSHTTPConnection(AWSConnection, SOCKSConnection):
+        """An HTTPConnection that supports 100 Continue behavior."""
+
+    class AWSSOCKSHTTPSConnection(AWSConnection, SOCKSHTTPSConnection):
+        """An HTTPSConnection that supports 100 Continue behavior."""
+
+    class AWSSOCKSHTTPConnectionPool(SOCKSHTTPConnectionPool):
+        ConnectionCls = AWSSOCKSHTTPConnection
+
+    class AWSSOCKSHTTPSConnectionPool(SOCKSHTTPSConnectionPool):
+        ConnectionCls = AWSSOCKSHTTPSConnection
 
 
 def prepare_request_dict(
