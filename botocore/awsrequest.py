@@ -25,8 +25,10 @@ from urllib3.connectionpool import HTTPSConnectionPool
 
 import botocore.utils
 from botocore.compat import six
-from botocore.compat import HTTPHeaders, HTTPResponse, urlunsplit, urlsplit, \
-     urlencode, MutableMapping
+from botocore.compat import (
+    HTTPHeaders, HTTPResponse, urlunsplit, urlsplit,
+    urlencode, urlparse, MutableMapping, HAS_SOCKS
+)
 from botocore.exceptions import UnseekableStreamError
 
 
@@ -225,6 +227,28 @@ class AWSHTTPConnectionPool(HTTPConnectionPool):
 
 class AWSHTTPSConnectionPool(HTTPSConnectionPool):
     ConnectionCls = AWSHTTPSConnection
+
+
+if HAS_SOCKS:
+    from urllib3.contrib.socks import SOCKSConnection
+    from urllib3.contrib.socks import SOCKSHTTPSConnection
+    from urllib3.contrib.socks import SOCKSHTTPConnectionPool
+    from urllib3.contrib.socks import SOCKSHTTPSConnectionPool
+
+    class AWSSOCKSHTTPConnection(AWSConnection, SOCKSConnection):
+        """ An HTTPConnection that supports 100 Continue behavior. """
+
+
+    class AWSSOCKSHTTPSConnection(AWSConnection, SOCKSHTTPSConnection):
+        """ An HTTPSConnection that supports 100 Continue behavior. """
+
+
+    class AWSSOCKSHTTPConnectionPool(SOCKSHTTPConnectionPool):
+        ConnectionCls = AWSSOCKSHTTPConnection
+
+
+    class AWSSOCKSHTTPSConnectionPool(SOCKSHTTPSConnectionPool):
+        ConnectionCls = AWSSOCKSHTTPSConnection
 
 
 def prepare_request_dict(request_dict, endpoint_url, context=None,
