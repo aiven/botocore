@@ -349,3 +349,10 @@ try:
     HAS_GZIP = True
 except ImportError:
     HAS_GZIP = False
+
+# Detect if socks is avaialble for use
+try:
+    import socks
+    HAS_SOCKS = True
+except ImportError:
+    HAS_SOCKS = False
